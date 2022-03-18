@@ -1,6 +1,7 @@
 import Tour from '../models/tourModel';
 import { StatusCodes } from 'http-status-codes';
 import ErrorHandler from '../utils/error-handler';
+import APIFeatures from '../utils/apiFeatures';
 
 /**
  * @desc    Get all tours
@@ -8,11 +9,21 @@ import ErrorHandler from '../utils/error-handler';
  * @access  Public
  */
 const getTours = async (req, res) => {
-  const tours = await Tour.find();
+  const resPerPage = 4;
+  const toursCount = await Tour.countDocuments();
+
+  const apiFeatures = new APIFeatures(Tour.find(), req.query)
+    .search()
+    .filter()
+    .paginate(resPerPage);
+  const tours = await apiFeatures.query;
+  const filteredToursCount = tours.length;
 
   res.status(StatusCodes.OK).json({
     success: true,
-    count: tours.length,
+    toursCount,
+    resPerPage,
+    filteredToursCount,
     tours,
   });
 };
