@@ -1,8 +1,10 @@
 import nc from 'next-connect';
 import { getTours, newTour } from '../../../controllers/tourController';
 import connectDb from '../../../config/connectDb';
+import onError from '../../../middlewares/errors';
+import 'express-async-errors';
 
-const handler = nc();
+const handler = nc({ onError });
 
 connectDb();
 

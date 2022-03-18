@@ -1,5 +1,6 @@
 import Tour from '../models/tourModel';
 import { StatusCodes } from 'http-status-codes';
+import ErrorHandler from '../utils/error-handler';
 
 /**
  * @desc    Get all tours
@@ -7,20 +8,13 @@ import { StatusCodes } from 'http-status-codes';
  * @access  Public
  */
 const getTours = async (req, res) => {
-  try {
-    const tours = await Tour.find();
+  const tours = await Tour.find();
 
-    res.status(StatusCodes.OK).json({
-      success: true,
-      count: tours.length,
-      tours,
-    });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: true,
-      error: error.message,
-    });
-  }
+  res.status(StatusCodes.OK).json({
+    success: true,
+    count: tours.length,
+    tours,
+  });
 };
 
 /**
@@ -28,28 +22,18 @@ const getTours = async (req, res) => {
  * @route   GET /api/tours/:id
  * @access  Public
  */
-const getTour = async (req, res) => {
+const getTour = async (req, res, next) => {
   const { id } = req.query;
-  try {
-    const tour = await Tour.findById(id);
+  const tour = await Tour.findById(id);
 
-    if (!tour) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: true,
-        error: `Tour not found with the id: ${id}`,
-      });
-    }
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      tour,
-    });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: true,
-      error: error.message,
-    });
+  if (!tour) {
+    return next(new ErrorHandler(`Tour not found with the id: ${id}`,StatusCodes.NOT_FOUND));
   }
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    tour,
+  });
 };
 
 /**
@@ -58,19 +42,12 @@ const getTour = async (req, res) => {
  * @access  Private
  */
 const newTour = async (req, res) => {
-  try {
-    const tour = await Tour.create(req.body);
+  const tour = await Tour.create(req.body);
 
-    res.status(StatusCodes.CREATED).json({
-      success: true,
-      tour,
-    });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: true,
-      error: error.message,
-    });
-  }
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    tour,
+  });
 };
 
 /**
@@ -78,33 +55,23 @@ const newTour = async (req, res) => {
  * @route   PATCH /api/tours/:id
  * @access  Private
  */
-const updateTour = async (req, res) => {
+const updateTour = async (req, res, next) => {
   const { id } = req.query;
-  try {
-    let tour = await Tour.findById(id);
-
-    if (!tour) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: true,
-        error: `Tour not found with the id: ${id}`,
-      });
-    }
-
-    tour = await Tour.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      tour,
-    });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: true,
-      error: error.message,
-    });
+  let tour = await Tour.findById(id);
+  
+  if (!tour) {
+    return next(new ErrorHandler(`Tour not found with the id: ${id}`,StatusCodes.NOT_FOUND));
   }
+
+  tour = await Tour.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    tour,
+  });
 };
 
 /**
@@ -112,30 +79,20 @@ const updateTour = async (req, res) => {
  * @route   DELETE /api/tours/:id
  * @access  Private
  */
-const deleteTour = async (req, res) => {
+const deleteTour = async (req, res, next) => {
   const { id } = req.query;
-  try {
-    let tour = await Tour.findById(id);
-
-    if (!tour) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: true,
-        error: `Tour not found with the id: ${id}`,
-      });
-    }
-
-    await tour.remove();
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: `Tour is deleted`,
-    });
-  } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: true,
-      error: error.message,
-    });
+  let tour = await Tour.findById(id);
+  
+  if (!tour) {
+    return next(new ErrorHandler(`Tour not found with the id: ${id}`,StatusCodes.NOT_FOUND));
   }
+
+  await tour.remove();
+
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: `Tour is deleted`,
+  });
 };
 
 export { getTours, getTour, newTour, updateTour, deleteTour };
