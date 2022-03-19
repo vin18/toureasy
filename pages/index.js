@@ -1,9 +1,10 @@
-export default function Home() {
+import Layout from '../components/layout/Layout';
+import Home from '../components/Home';
+
+export default function HomePage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-green-500 underline">
-        Hello world!
-      </h1>
-    </div>
+    <Layout>
+      <Home />
+    </Layout>
   );
 }
